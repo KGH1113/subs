@@ -153,6 +153,7 @@ export default function NewCrewPage() {
               - 행사 준비 일정 등으로 인해 개인 시간을 소비해야 하는 경우도
               발생할 수 있습니다.
             </li>
+            <li>- 지원서에 포함되어야 하는 내용은 다음과 같습니다: 지원동기, 자기소개, 학급임원경험</li>
             <li>
               - 직접 편집한 영상이 있으신 분은 seounbroadcast@gmail.com으로
               보내주시면 선발에 참고하도록 하겠습니다.
