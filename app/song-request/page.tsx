@@ -57,7 +57,7 @@ export default function SongRequestPage() {
   const [songList, setSongList] = useState<SongRequest[]>();
 
   async function refreshSongList() {
-    axios.get("/api/song-request").then((response) => {
+    axios.get(`/api/song-request?${Number(new Date())}`).then((response) => {
       setSongList(response.data);
     });
   }
@@ -81,7 +81,7 @@ export default function SongRequestPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios
-      .post("/api/song-request", {
+      .post(`/api/song-request?${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
         songTitle: values.songTitle,
@@ -91,7 +91,7 @@ export default function SongRequestPage() {
         if (response.data.isValid) {
           toast.success("노래가 신청되었습니다.");
         } else {
-          console.log(response.data)
+          console.log(response.data);
           toast.error(response.data.message);
         }
         refreshSongList();

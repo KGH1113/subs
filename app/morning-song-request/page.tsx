@@ -57,9 +57,11 @@ export default function MorningSongRequestPage() {
   const [songList, setSongList] = useState<SongRequest[]>();
 
   async function refreshSongList() {
-    axios.get("/api/morning-song-request").then((response) => {
-      setSongList(response.data);
-    });
+    axios
+      .get(`/api/morning-song-request?${Number(new Date())}`)
+      .then((response) => {
+        setSongList(response.data);
+      });
   }
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function MorningSongRequestPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios
-      .post("/api/morning-song-request", {
+      .post(`/api/morning-song-request?${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
         songTitle: values.songTitle,

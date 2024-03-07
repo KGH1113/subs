@@ -19,15 +19,7 @@ interface Validity {
   message: string;
 }
 
-function getCurrentSeoulDateTime(): Date {
-  const seoulDateStr = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Seoul",
-  });
-
-  const seoulDateObj = new Date(seoulDateStr);
-
-  return seoulDateObj;
-}
+let requestedDateTime: Date;
 
 function isRequestValid({
   requests,
@@ -50,7 +42,7 @@ function isRequestValid({
   let message: string = "";
 
   // Check if it is a weekend in Seoul, Korea
-  const today = getCurrentSeoulDateTime();
+  const today = requestedDateTime;
   const dayOfWeek = today.getDay();
   // const isWeekend = false;
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday (considering Sunday as the weekend)
@@ -131,7 +123,7 @@ async function addSongRequest({
     return { isValid: false, message: isValidDoc.message };
   }
 
-  const currentDate = getCurrentSeoulDateTime();
+  const currentDate = requestedDateTime;
   const v = await SongRequestModel.findOne({
     date: currentDate.toLocaleDateString(),
   });
@@ -154,7 +146,7 @@ async function addSongRequest({
             studentNumber: studentNumber,
             songTitle: songTitle,
             singer: singer,
-            timestamp: getCurrentSeoulDateTime(),
+            timestamp: requestedDateTime,
           },
         },
       },
@@ -172,7 +164,7 @@ async function addSongRequest({
 
 async function getSongList(): Promise<SongRequest[]> {
   await connectToDB();
-  const currentDate = getCurrentSeoulDateTime();
+  const currentDate = requestedDateTime;
   const v = await SongRequestModel.findOne({
     date: currentDate.toLocaleDateString(),
   });
@@ -181,12 +173,18 @@ async function getSongList(): Promise<SongRequest[]> {
 }
 
 export async function POST(request: NextRequest) {
+  requestedDateTime = new Date(
+    Number(request.nextUrl.searchParams.get("date"))
+  );
   const requestedData: SongRequest = await request.json();
   const result = await addSongRequest(requestedData);
   return NextResponse.json(result);
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  requestedDateTime = new Date(
+    Number(request.nextUrl.searchParams.get("date"))
+  );
   const data = await getSongList();
   return NextResponse.json(data);
 }
