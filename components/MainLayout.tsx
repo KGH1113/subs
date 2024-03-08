@@ -132,7 +132,7 @@ export default function MainLayout({
                   <span>{"건의사항 신청"}</span>
                 </SidebarLink>
                 <SidebarLink hrefName={"/new-crew"} active={isNewCrewActive}>
-                  <Lucide.Mail className="w-5" />
+                  <Lucide.File className="w-5" />
                   <span>{"방송부원 모집"}</span>
                 </SidebarLink>
               </div>

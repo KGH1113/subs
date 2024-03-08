@@ -99,6 +99,15 @@ export default function MorningSongRequestPage() {
         refreshSongList();
         setLeftSecToRefresh(5);
       });
+    form.reset(
+      (values = {
+        name: "",
+        studentNumber: "",
+        singer: "",
+        songTitle: "",
+        readPrecaution: false,
+      })
+    );
   }
 
   return (

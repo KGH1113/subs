@@ -78,6 +78,14 @@ export default function SuggestionRequestPage() {
         }
         refreshSuggestionList();
       });
+    form.reset(
+      (values = {
+        name: "",
+        studentNumber: "",
+        suggestion: "",
+        readPrecaution: false,
+      })
+    );
   }
 
   return (
