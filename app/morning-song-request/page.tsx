@@ -58,7 +58,7 @@ export default function MorningSongRequestPage() {
 
   async function refreshSongList() {
     axios
-      .get(`/api/morning-song-request?${Number(new Date())}`)
+      .get(`/api/morning-song-request?date=${Number(new Date())}`)
       .then((response) => {
         setSongList(response.data);
       });
@@ -83,7 +83,7 @@ export default function MorningSongRequestPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios
-      .post(`/api/morning-song-request?${Number(new Date())}`, {
+      .post(`/api/morning-song-request?date=${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
         songTitle: values.songTitle,

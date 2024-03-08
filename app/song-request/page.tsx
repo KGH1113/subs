@@ -57,7 +57,7 @@ export default function SongRequestPage() {
   const [songList, setSongList] = useState<SongRequest[]>();
 
   async function refreshSongList() {
-    axios.get(`/api/song-request?${Number(new Date())}`).then((response) => {
+    axios.get(`/api/song-request?date=${Number(new Date())}`).then((response) => {
       setSongList(response.data);
     });
   }
@@ -81,7 +81,7 @@ export default function SongRequestPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios
-      .post(`/api/song-request?${Number(new Date())}`, {
+      .post(`/api/song-request?date=${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
         songTitle: values.songTitle,
