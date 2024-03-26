@@ -109,11 +109,11 @@ export default function SongRequestPage() {
   }
 
   return (
-    <div className="block sm:flex w-full" style={{ height: "100%" }}>
+    <div className="block sm:flex w-full h-full" style={{ height: "100%" }}>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-[20px] sm:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-full sm:h-fit"
+          className="flex flex-col gap-[20px] sm:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-fit sm:h-full"
         >
           <FormField
             control={form.control}

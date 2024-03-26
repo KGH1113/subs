@@ -161,7 +161,7 @@ export default function MainLayout({
           </div>
           <h1 className="font-semibold text-lg mr-3">{getTitle()}</h1>
         </div>
-        <main className="w-full overflow-visible p-6 text-sm font-medium mt-[101px] sm:mt-[0px]">
+        <main className="w-full h-full overflow-visible p-6 text-sm font-medium mt-[101px] sm:mt-[0px]">
           {children}
         </main>
       </ResizablePanel>
