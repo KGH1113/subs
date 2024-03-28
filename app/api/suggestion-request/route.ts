@@ -19,20 +19,20 @@ interface Validity {
   message: string;
 }
 
-async function addSuggestion({
-  name,
-  studentNumber,
-  suggestion,
-}: SuggestionRequest): Promise<Validity> {
+async function addSuggestion(
+  { name, studentNumber, suggestion }: SuggestionRequest,
+  requestedTime: Date
+): Promise<Validity> {
   await connectToDB();
-  const blacklist = await SuggestionRequestModel.findById(
-    "659044a7bccbf9ea338d017c"
+  const blacklist: { requests: BlacklistItem[] } =
+    (await SuggestionRequestModel.findById("65904732bccbf9ea338d017d")) as {
+      requests: BlacklistItem[];
+    };
+  const blklistStudentNumbers: string[] = blacklist.requests.map(
+    (e: BlacklistItem) => e.studentNumber
   );
-  if (
-    blacklist.requests.some(
-      (d: BlacklistItem) => d.studentNumber === studentNumber
-    )
-  ) {
+  console.log(blklistStudentNumbers);
+  if (blklistStudentNumbers.includes(studentNumber)) {
     return {
       isValid: false,
       message:
@@ -48,6 +48,7 @@ async function addSuggestion({
             studentNumber: studentNumber,
             suggestion: suggestion,
             answer: "",
+            timestamp: requestedTime,
           },
         },
       },
@@ -69,8 +70,12 @@ async function getSuggestion(): Promise<SuggestionRequest[]> {
 }
 
 export async function POST(request: NextRequest) {
+  const requestedTime = request.nextUrl.searchParams.get("date");
   const requestedData: SuggestionRequest = await request.json();
-  const result = await addSuggestion(requestedData);
+  const result = await addSuggestion(
+    requestedData,
+    new Date(Number(requestedTime))
+  );
   return NextResponse.json(result);
 }
 

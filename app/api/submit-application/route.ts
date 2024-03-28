@@ -14,12 +14,10 @@ interface Validity {
   message: string;
 }
 
-async function addFileInfoToDB({
-  name,
-  studentNumber,
-  applicationFileURL,
-  fileType,
-}: Application): Promise<Validity> {
+async function addFileInfoToDB(
+  { name, studentNumber, applicationFileURL, fileType }: Application,
+  requestedTime: Date
+): Promise<Validity> {
   await connectToDB();
   const isValidDoc = JSON.parse(
     JSON.stringify(await ApplicationModel.findById("65e5a2deabca692f1f9590f9"))
@@ -36,6 +34,7 @@ async function addFileInfoToDB({
           studentNumber: studentNumber,
           applicationFileURL: applicationFileURL,
           fileType: fileType,
+          timestamp: requestedTime,
         },
       },
     },
@@ -44,8 +43,12 @@ async function addFileInfoToDB({
   return { isValid: true, message: "" };
 }
 
-export async function POST(req: NextRequest) {
-  const requestedData: Application = await req.json();
-  const result = await addFileInfoToDB(requestedData);
+export async function POST(request: NextRequest) {
+  const requestedTime = request.nextUrl.searchParams.get("date");
+  const requestedData: Application = await request.json();
+  const result = await addFileInfoToDB(
+    requestedData,
+    new Date(Number(requestedTime))
+  );
   return NextResponse.json(result);
 }

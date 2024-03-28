@@ -19,7 +19,6 @@ const applicationSchema = new Schema({
   },
   timestamp: {
     type: Date,
-    default: Date.now,
   },
 });
 

@@ -19,27 +19,16 @@ interface Validity {
   message: string;
 }
 
-// 서울의 현재 날짜와 시간을 얻는 함수
-function getSeoulTime(): Date {
-  const seoulOffset = 9;
-
-  const currentDate = new Date();
-
-  const seoulTime = new Date(
-    currentDate.getTime() + seoulOffset * 60 * 60 * 1000
-  );
-
-  return seoulTime;
-}
-
 function isRequestValid({
   requests,
   blacklist,
   newRequest,
+  requestedTime,
 }: {
   requests: SongRequest[];
   blacklist: BlacklistItem[];
   newRequest: SongRequest;
+  requestedTime: Date;
 }): Validity {
   const strProcess = (str: string) =>
     str
@@ -53,8 +42,7 @@ function isRequestValid({
   let message: string = "";
 
   // Check if it is a weekend in Seoul, Korea
-  const today = getSeoulTime();
-  const dayOfWeek = today.getDay();
+  const dayOfWeek = requestedTime.getDay();
   // const isWeekend = false;
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday (considering Sunday as the weekend)
 
@@ -119,12 +107,10 @@ function isRequestValid({
   return { isValid, message };
 }
 
-async function addSongRequest({
-  name,
-  studentNumber,
-  songTitle,
-  singer,
-}: SongRequest): Promise<Validity> {
+async function addSongRequest(
+  { name, studentNumber, songTitle, singer }: SongRequest,
+  requestedTime: Date
+): Promise<Validity> {
   await connectToDB();
 
   const isValidDoc = JSON.parse(
@@ -134,9 +120,8 @@ async function addSongRequest({
     return { isValid: false, message: isValidDoc.message };
   }
 
-  const currentDate = getSeoulTime();
   const v = await SongRequestModel.findOne({
-    date: currentDate.toLocaleDateString(),
+    date: requestedTime.toLocaleDateString(),
   });
   const requests = v ? v : { requests: [] };
   const blacklist = await SongRequestModel.findOne({
@@ -146,10 +131,11 @@ async function addSongRequest({
     requests: requests.requests,
     blacklist: blacklist.requests,
     newRequest: { name, studentNumber, songTitle, singer },
+    requestedTime,
   });
   if (requestValidity.isValid) {
     await SongRequestModel.findOneAndUpdate(
-      { date: currentDate.toLocaleDateString() },
+      { date: requestedTime.toLocaleDateString() },
       {
         $push: {
           requests: {
@@ -157,7 +143,7 @@ async function addSongRequest({
             studentNumber: studentNumber,
             songTitle: songTitle,
             singer: singer,
-            timestamp: getSeoulTime(),
+            timestamp: requestedTime,
           },
         },
       },
@@ -173,24 +159,27 @@ async function addSongRequest({
   }
 }
 
-async function getSongList(): Promise<SongRequest[]> {
+async function getSongList(requestedTime: Date): Promise<SongRequest[]> {
   await connectToDB();
-  const currentDate = getSeoulTime();
   const v = await SongRequestModel.findOne({
-    date: currentDate.toLocaleDateString(),
+    date: requestedTime.toLocaleDateString(),
   });
   const requests: { requests: SongRequest[] } = v ? v : { requests: [] };
   return requests.requests;
 }
 
 export async function POST(request: NextRequest) {
+  const requestedTime = request.nextUrl.searchParams.get("date");
   const requestedData: SongRequest = await request.json();
-  const result = await addSongRequest(requestedData);
+  const result = await addSongRequest(
+    requestedData,
+    new Date(Number(requestedTime))
+  );
   return NextResponse.json(result);
 }
 
 export async function GET(request: NextRequest) {
-  const data = await getSongList();
-  console.log(data);
+  const requestedTime = request.nextUrl.searchParams.get("date");
+  const data = await getSongList(new Date(Number(requestedTime)));
   return NextResponse.json(data);
 }

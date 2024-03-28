@@ -49,7 +49,7 @@ export default function NewCrewPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     axios
-      .post("/api/submit-application", {
+      .post(`/api/submit-application?date=${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
         applicationFileURL: fileUrl,

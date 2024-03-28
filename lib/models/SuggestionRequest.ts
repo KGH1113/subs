@@ -19,7 +19,6 @@ const suggestionSchema = new Schema({
   },
   timestamp: {
     type: Date,
-    default: Date.now,
   },
 });
 
