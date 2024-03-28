@@ -72,6 +72,10 @@ async function getSuggestion(): Promise<SuggestionRequest[]> {
 export async function POST(request: NextRequest) {
   const requestedTime = request.nextUrl.searchParams.get("date");
   const requestedData: SuggestionRequest = await request.json();
+  requestedData.studentNumber =
+    String(new Date(Number(requestedTime)).getFullYear()).slice(2, 4) +
+    "s" +
+    requestedData.studentNumber;
   const result = await addSuggestion(
     requestedData,
     new Date(Number(requestedTime))
