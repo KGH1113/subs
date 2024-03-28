@@ -63,11 +63,16 @@ export default function SuggestionRequestPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log({
+      name: values.name,
+      studentNumber: values.studentNumber,
+      suggesion: values.suggestion,
+    });
     axios
-      .post("/api/suggetion-request", {
+      .post(`/api/suggestion-request?date=${Number(new Date())}`, {
         name: values.name,
         studentNumber: values.studentNumber,
-        suggesion: values.suggestion,
+        suggestion: values.suggestion,
       })
       .then((response) => {
         if (response.data.isValid) {
@@ -90,13 +95,13 @@ export default function SuggestionRequestPage() {
 
   return (
     <div className="block sm:flex w-full" style={{ height: "89%" }}>
-      <div className="flex flex-col gap-[20px] sm:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-[100dvh-101px]">
+      <div className="flex flex-col gap-[20px] sm:w-3/4 sm:p-3 sm:pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-[100dvh-101px]">
         <div className="space-y-2 p-3">
           <ul className="mx-[10px]">
             {suggestionList?.length === 0 ? (
               <li>아직 신청된 건의사항이 없습니다.</li>
             ) : (
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="multiple" className="w-full">
                 {suggestionList?.map((suggestionData, index) => (
                   <li key={index}>
                     <AccordionItem value={`item-${index}`} key={index}>
@@ -104,7 +109,7 @@ export default function SuggestionRequestPage() {
                         {suggestionData.suggestion}
                       </AccordionTrigger>
                       <AccordionContent>
-                        &nbsp;&nbsp;&nbsp;{suggestionData.answer}
+                        &nbsp;&nbsp;&nbsp;{suggestionData.answer !== "" ? suggestionData.answer : "(아직 답변이 달리지 않았습니다.)"}
                       </AccordionContent>
                     </AccordionItem>
                   </li>
@@ -135,7 +140,7 @@ export default function SuggestionRequestPage() {
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">신청하기</h2>
           </div>
-          <div className="ml-[10px]">
+          <div className="ml-[10px] space-y-[20px]">
             <FormField
               control={form.control}
               name="name"
