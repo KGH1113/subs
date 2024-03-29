@@ -2,6 +2,8 @@ import { connectToDB } from "@/lib/mongoose";
 import MorningSongRequestModel from "@/lib/models/MorningSongRequest";
 import { NextRequest, NextResponse } from "next/server";
 
+process.env.TZ = 'Asia/Seoul';
+
 interface SongRequest {
   name: string;
   studentNumber: string;
@@ -17,18 +19,6 @@ interface BlacklistItem {
 interface Validity {
   isValid: boolean;
   message: string;
-}
-
-function getSeoulTime(): Date {
-  const seoulOffset = 9;
-
-  const currentDate = new Date();
-
-  const seoulTime = new Date(
-    currentDate.getTime() + seoulOffset * 60 * 60 * 1000
-  );
-
-  return seoulTime;
 }
 
 function isRequestValid({
@@ -52,7 +42,7 @@ function isRequestValid({
   let message: string = "";
 
   // Check if it is a weekend in Seoul, Korea
-  const today = getSeoulTime();
+  const today = new Date();
   const dayOfWeek = today.getDay();
   // const isWeekend = false;
   const isWeekend: boolean = dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday (considering Sunday as the weekend)
@@ -138,7 +128,7 @@ async function addSongRequest({
     return { isValid: false, message: isValidDoc.message };
   }
 
-  const currentDate = getSeoulTime();
+  const currentDate = new Date();
   const v = await MorningSongRequestModel.findOne({
     date: currentDate.toLocaleDateString(),
   });
@@ -161,7 +151,7 @@ async function addSongRequest({
             studentNumber: studentNumber,
             songTitle: songTitle,
             singer: singer,
-            timestamp: getSeoulTime(),
+            timestamp: new Date(),
           },
         },
       },
@@ -179,7 +169,7 @@ async function addSongRequest({
 
 async function getSongList(): Promise<SongRequest[]> {
   await connectToDB();
-  const currentDate = getSeoulTime();
+  const currentDate = new Date();
   const v = await MorningSongRequestModel.findOne({
     date: currentDate.toLocaleDateString(),
   });

@@ -2,6 +2,8 @@ import { connectToDB } from "@/lib/mongoose";
 import SongRequestModel from "@/lib/models/SongRequest";
 import { NextRequest, NextResponse } from "next/server";
 
+process.env.TZ = "Asia/Seoul";
+
 interface SongRequest {
   name: string;
   studentNumber: string;
@@ -169,21 +171,18 @@ async function getSongList(requestedTime: Date): Promise<SongRequest[]> {
 }
 
 export async function POST(request: NextRequest) {
-  const requestedTime = request.nextUrl.searchParams.get("date");
   const requestedData: SongRequest = await request.json();
+
+  const now = new Date();
   requestedData.studentNumber =
-    String(new Date(Number(requestedTime)).getFullYear()).slice(2, 4) +
-    "s" +
-    requestedData.studentNumber;
-  const result = await addSongRequest(
-    requestedData,
-    new Date(Number(requestedTime))
-  );
+    String(now.getFullYear()).slice(2, 4) + "s" + requestedData.studentNumber;
+
+  const result = await addSongRequest(requestedData, now);
   return NextResponse.json(result);
 }
 
 export async function GET(request: NextRequest) {
-  const requestedTime = request.nextUrl.searchParams.get("date");
-  const data = await getSongList(new Date(Number(requestedTime)));
+  const now = new Date();
+  const data = await getSongList(now);
   return NextResponse.json(data);
 }

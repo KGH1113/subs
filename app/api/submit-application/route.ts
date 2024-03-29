@@ -2,6 +2,8 @@ import { connectToDB } from "@/lib/mongoose";
 import ApplicationModel from "@/lib/models/Application";
 import { NextRequest, NextResponse } from "next/server";
 
+process.env.TZ = "Asia/Seoul";
+
 interface Application {
   name: string;
   studentNumber: string;
@@ -44,15 +46,13 @@ async function addFileInfoToDB(
 }
 
 export async function POST(request: NextRequest) {
-  const requestedTime = request.nextUrl.searchParams.get("date");
   const requestedData: Application = await request.json();
+
+  const now = new Date();
+
   requestedData.studentNumber =
-    String(new Date(Number(requestedTime)).getFullYear()).slice(2, 4) +
-    "s" +
-    requestedData.studentNumber;
-  const result = await addFileInfoToDB(
-    requestedData,
-    new Date(Number(requestedTime))
-  );
+    String(now.getFullYear()).slice(2, 4) + "s" + requestedData.studentNumber;
+
+  const result = await addFileInfoToDB(requestedData, now);
   return NextResponse.json(result);
 }
