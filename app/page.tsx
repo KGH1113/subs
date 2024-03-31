@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 
 import {
   Accordion,
@@ -7,7 +9,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import Swal from "sweetalert2";
+
 export default function Home(): React.ReactNode {
+  useEffect(() => {
+    Swal.fire({
+      title: "ㅋ",
+      html: `<iframe width="460" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=8aA0sv_6tJdAsbZs&autoplay=1&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><p>만우절임</p>`,
+    });
+  }, []);
   return (
     <main>
       <Accordion type="single" collapsible className="w-full">
