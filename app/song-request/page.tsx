@@ -57,9 +57,11 @@ export default function SongRequestPage() {
   const [songList, setSongList] = useState<SongRequest[]>();
 
   async function refreshSongList() {
-    axios.get(`/api/song-request?date=${Number(new Date())}`).then((response) => {
-      setSongList(response.data);
-    });
+    axios
+      .get(`/api/song-request?date=${Number(new Date())}`)
+      .then((response) => {
+        setSongList(response.data);
+      });
   }
 
   useEffect(() => {
@@ -203,11 +205,20 @@ export default function SongRequestPage() {
         </div>
         <div className="space-y-2 p-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">신청목록</h2>
+            <h2 className="text-lg font-semibold">신청목록 </h2>
             <div className="flex items-center text-ring">
-              <TimerReset size={15} />
+              <TimerReset
+                size={15}
+                className="cursor-pointer"
+                onClick={async () => {
+                  await refreshSongList();
+                }}
+              />
               <p>{leftSecToRefresh}</p>
             </div>
+            <span className="text-sm text-ring font-normal mr-1">
+              {new Date().toLocaleDateString()}
+            </span>
           </div>
           <ul className="mx-[10px]">
             {songList?.length === 0 ? (
