@@ -117,13 +117,13 @@ export default function MainLayout({
                   <Lucide.Music4 className="w-5" />
                   <span>{"점심시간 음악신청"}</span>
                 </SidebarLink>
-                {/* <SidebarLink
+                <SidebarLink
                   hrefName={"/morning-song-request"}
                   active={isMorningSongRequestActive}
                 >
                   <Lucide.Music2 className="w-5" />
                   <span>{"등굣길 음악신청"}</span>
-                </SidebarLink> */}
+                </SidebarLink>
                 <SidebarLink
                   hrefName={"/suggestion-request"}
                   active={isSuggestionActive}

@@ -2,7 +2,7 @@ import { connectToDB } from "@/lib/mongoose";
 import MorningSongRequestModel from "@/lib/models/MorningSongRequest";
 import { NextRequest, NextResponse } from "next/server";
 
-process.env.TZ = 'Asia/Seoul';
+process.env.TZ = "Asia/Seoul";
 
 interface SongRequest {
   name: string;
@@ -46,7 +46,8 @@ function isRequestValid({
   const dayOfWeek = today.getDay();
   // const isWeekend = false;
   const isWeekend: boolean = dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday (considering Sunday as the weekend)
-  const isMorning: boolean = today.getHours() < 8;
+
+  const isValidTime: boolean = today.getHours() <= 8 || today.getHours() >= 18;
 
   // Check if the request limit (10개) is over
   const requestCount = requests.length;
@@ -76,6 +77,7 @@ function isRequestValid({
     ["nct", "엔시티"],
     ["엔시티 유", "nct u"],
     ["Seventeen", "세븐틴", "새븐틴"],
+    ["txt", "투머로우바이투게더", "투바투"],
   ].map((d, i) => d.map(strProcess));
 
   const isDuplicateSingerRequested: boolean = duplicatedSingerNames.some(
@@ -88,7 +90,7 @@ function isRequestValid({
   // Final validation
   if (isWeekend) {
     message = "주말에는 신청을 받지 않습니다.";
-  } else if (isMorning) {
+  } else if (!isValidTime) {
     message = "신청이 가능한 시간대가 아닙니다.";
   } else if (isRequestLimitReached) {
     message = "오늘 신청이 마감되었습니다. (10개)";
@@ -129,8 +131,17 @@ async function addSongRequest({
   }
 
   const currentDate = new Date();
+  const dateString: string =
+    currentDate.getHours() >= 18
+      ? `${currentDate.getMonth() + 1}/${
+          currentDate.getDate() + 1
+        }/${currentDate.getFullYear()}`
+      : `${
+          currentDate.getMonth() + 1
+        }/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+
   const v = await MorningSongRequestModel.findOne({
-    date: currentDate.toLocaleDateString(),
+    date: dateString,
   });
   const requests = v ? v : { requests: [] };
   const blacklist = await MorningSongRequestModel.findOne({
@@ -143,7 +154,7 @@ async function addSongRequest({
   });
   if (requestValidity.isValid) {
     await MorningSongRequestModel.findOneAndUpdate(
-      { date: currentDate.toLocaleDateString() },
+      { date: dateString },
       {
         $push: {
           requests: {
@@ -170,8 +181,16 @@ async function addSongRequest({
 async function getSongList(): Promise<SongRequest[]> {
   await connectToDB();
   const currentDate = new Date();
+  const dateString: string =
+    currentDate.getHours() >= 18
+      ? `${currentDate.getMonth() + 1}/${
+          currentDate.getDate() + 1
+        }/${currentDate.getFullYear()}`
+      : `${
+          currentDate.getMonth() + 1
+        }/${currentDate.getDate()}/${currentDate.getFullYear()}`;
   const v = await MorningSongRequestModel.findOne({
-    date: currentDate.toLocaleDateString(),
+    date: dateString,
   });
   const requests: { requests: SongRequest[] } = v ? v : { requests: [] };
   return requests.requests;
@@ -187,5 +206,3 @@ export async function GET(request: NextRequest) {
   const data = await getSongList();
   return NextResponse.json(data);
 }
-
-// TODO: 전날밤에 신청받는 기능

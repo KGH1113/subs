@@ -55,6 +55,7 @@ const formSchema = z.object({
 export default function MorningSongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
   const [songList, setSongList] = useState<SongRequest[]>();
+  const [dateIndicator, setDateIndicator] = useState<string>("");
 
   async function refreshSongList() {
     axios
@@ -72,6 +73,16 @@ export default function MorningSongRequestPage() {
         refreshSongList();
         setLeftSecToRefresh(5);
       }
+      const currentDate = new Date();
+      const dateString: string =
+        currentDate.getHours() >= 18
+          ? `${currentDate.getMonth() + 1}/${
+              currentDate.getDate() + 1
+            }/${currentDate.getFullYear()}`
+          : `${
+              currentDate.getMonth() + 1
+            }/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+      setDateIndicator(dateString);
     }, 1000);
 
     return () => clearInterval(refreshInterval);
@@ -211,9 +222,18 @@ export default function MorningSongRequestPage() {
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">신청목록</h2>
             <div className="flex items-center text-ring">
-              <TimerReset size={15} />
+              <TimerReset
+                size={15}
+                className="cursor-pointer"
+                onClick={async () => {
+                  await refreshSongList();
+                }}
+              />
               <p>{leftSecToRefresh}</p>
             </div>
+            <span className="text-sm text-ring font-normal mr-1">
+              {dateIndicator}
+            </span>
           </div>
           <ul className="mx-[10px]">
             {songList?.length === 0 ? (
