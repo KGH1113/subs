@@ -82,6 +82,7 @@ export default function MainLayout({
       <ResizablePanel
         minSize={10}
         defaultSize={15}
+        order={1}
         className={`${showSidebar ? "" : "hidden"}`}
       >
         {children}
@@ -93,10 +94,10 @@ export default function MainLayout({
       <SidebarLayout>
         <aside
           id="sidebar"
-          className="max-[640px]:absolute z-20 top-0 h-screen"
+          className="h-screen"
         >
-          <div className="max-[640px]:flex max-[640px]:gap-3 max-[640px]:w-3/4">
-            <div className="block h-[200px] justify-center items-center p-6 bg-background overflow-hidden max-[640px]:border-solid max-[640px]:border h-screen">
+          <div className="fixed sm:relative z-20 max-[640px]:flex max-[640px]:gap-3 max-[640px]:w-3/4 z-100">
+            <div className=" block h-[200px] justify-center items-center p-6 bg-background overflow-hidden max-[640px]:border-solid max-[640px]:border h-screen max-[640px]:w-3/4">
               <div className="flex gap-3 w-full h-8 mt-3 mb-8 items-center font-semibold">
                 <Avatar>
                   <AvatarImage src={"https://i.ibb.co/XJyZjdm/logo192.png"} />
@@ -149,8 +150,8 @@ export default function MainLayout({
         </aside>
       </SidebarLayout>
       <ResizableHandle withHandle className="max-[640px]:hidden" />
-      <ResizablePanel minSize={70} defaultSize={85}>
-        <div className="fixed sm:relative z-10 flex w-full h-[101px] justify-between items-center px-5 border-border border-b-[1px] bg-background">
+      <ResizablePanel minSize={70} defaultSize={85} order={2}>
+        <div className="fixed sm:relative z-10 flex w-full h-[101px] justify-between items-center px-5 border-border border-b-[1px] bg-background"> {}
           <div className="w-[24px] h-[24px] flex items-center justify-center">
             <Lucide.Menu
               className="min-[640px]:hidden"

@@ -3,27 +3,14 @@
 import React, { useEffect, useState } from "react";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -33,7 +20,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { TimerReset } from "lucide-react";
+import { TimerReset, Loader } from "lucide-react";
 
 import axios from "axios";
 
@@ -55,6 +42,7 @@ const formSchema = z.object({
 export default function SongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
   const [songList, setSongList] = useState<SongRequest[]>();
+  const [detailedView, setDetailedView] = useState<boolean>(false);
 
   async function refreshSongList() {
     axios
@@ -206,10 +194,9 @@ export default function SongRequestPage() {
         <div className="space-y-2 p-3">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">신청목록 </h2>
-            <div className="flex items-center text-ring">
+            <div className="flex items-center text-ring hover:bg-secondary p-1 rounded-md cursor-pointer">
               <TimerReset
                 size={15}
-                className="cursor-pointer"
                 onClick={async () => {
                   await refreshSongList();
                 }}
@@ -219,26 +206,58 @@ export default function SongRequestPage() {
             <span className="text-sm text-ring font-normal mr-1">
               {new Date().toLocaleDateString()}
             </span>
-          </div>
-          <ul className="mx-[10px]">
-            {songList?.length === 0 ? (
-              <li>아직 신청된 곡이 없습니다.</li>
+            {!songList ? (
+              <Loader className="text-slate-400 animate-spin" size={17} />
             ) : (
-              songList?.map((songData, index) => (
-                <li
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `${songData.songTitle} - ${songData.singer}`
-                    );
-                    toast.success("복사되었습니다.");
-                  }}
-                  key={index}
-                >
-                  {`${songData.songTitle} - ${songData.singer}`}
-                </li>
-              ))
+              <></>
             )}
-          </ul>
+          </div>
+          <div>
+            {!songList ? (
+              <ul className="mx-[10px] space-y-1 animate-pulse">. . .</ul>
+            ) : (
+              <ul className="mx-[10px] space-y-1">
+                {songList?.length === 0 ? (
+                  <li>아직 신청된 곡이 없습니다.</li>
+                ) : (
+                  songList?.map((songData, index) => (
+                    <li
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${songData.songTitle} - ${songData.singer}`
+                        );
+                        toast.success("복사되었습니다.");
+                      }}
+                      key={index}
+                      className="flex space-x-1 sm:space-x-3 hover:underline cursor-pointer items-center"
+                    >
+                      <p className="w-fit ">{`${
+                        songData.songTitle.length <= 10
+                          ? songData.songTitle
+                          : detailedView
+                          ? songData.songTitle
+                          : `${songData.songTitle.slice(0, 10)}...`
+                      }`}</p>
+                      <p className="w-fit ">-</p>
+                      <p className="w-fit ">{`${songData.singer}`}</p>
+                    </li>
+                  ))
+                )}
+                <div className="">
+                  {songList?.length === 0 ? (
+                    <></>
+                  ) : (
+                    <li
+                      className="flex px-2 py-1 rounded-md cursor-pointer w-fit hover:bg-secondary mt-4"
+                      onClick={() => setDetailedView((prev) => !prev)}
+                    >
+                      {detailedView ? "간략히 보기" : "자세히 보기"}
+                    </li>
+                  )}
+                </div>
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </div>
