@@ -43,6 +43,7 @@ export default function MorningSongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
   const [songList, setSongList] = useState<SongRequest[]>();
   const [dateIndicator, setDateIndicator] = useState<string>("");
+  const [detailedView, setDetailedView] = useState<boolean>(false);
 
   async function refreshSongList() {
     axios
@@ -218,7 +219,7 @@ export default function MorningSongRequestPage() {
               <p>{leftSecToRefresh}</p>
             </div>
             <span className="text-sm text-ring font-normal mr-1">
-              {new Date().toLocaleDateString()}
+              {dateIndicator}
             </span>
             {!songList ? (
               <Loader className="text-slate-400 animate-spin" size={17} />
@@ -243,7 +244,7 @@ export default function MorningSongRequestPage() {
                         toast.success("복사되었습니다.");
                       }}
                       key={index}
-                      className="flex space-x-3 hover:underline cursor-pointer items-center"
+                      className="flex space-x-1 sm:space-x-3 hover:underline cursor-pointer items-center"
                     >
                       <p>{`${
                         songData.songTitle.length <= 10
