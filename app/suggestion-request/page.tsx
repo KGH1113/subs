@@ -104,10 +104,10 @@ export default function SuggestionRequestPage() {
                   <li key={index}>
                     <AccordionItem value={`item-${index}`} key={index}>
                       <AccordionTrigger>
-                        {suggestionData.suggestion}
+                        <p className="font-bold">{suggestionData.suggestion}</p>
                       </AccordionTrigger>
                       <AccordionContent>
-                        &nbsp;&nbsp;&nbsp;{suggestionData.answer !== "" ? suggestionData.answer : "(아직 답변이 달리지 않았습니다.)"}
+                        <p className="text-slate-400">&nbsp;&nbsp;&nbsp;{suggestionData.answer !== "" ? suggestionData.answer : "(아직 답변이 달리지 않았습니다.)"}</p>
                       </AccordionContent>
                     </AccordionItem>
                   </li>
