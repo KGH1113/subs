@@ -195,11 +195,13 @@ export default function MorningSongRequestPage() {
           <h2 className="text-lg font-semibold">신청시 주의사항</h2>
           <ul className="mx-[10px] space-y-2">
             <li>- 건전한 노래만 신청해주세요.</li>
-            <li>
-              - 일본노래, 이세계아이돌, 보컬로이드 등은 신청하지 말아주세요.
-            </li>
+            <li>- 대중성이 있는 노래만 신청해 주세요.</li>
             <li>- 본인이 직접 신청해주세요.</li>
             <li>- 중복된 가수의 노래 신청은 하지 말아주세요.</li>
+            <li>
+              - 신청곡이 신청했되었으나, 방송부원들의 의견에 따라 신청곡이
+              재생되지 않을 수 있습니다.
+            </li>
             <li>
               - 신청은 노래가 재생되는 날 기준 전날 오후 6시부터 당일 8시까지
               가능합니다.
