@@ -77,6 +77,7 @@ function isRequestValid({
     ["엔시티 유", "nct u"],
     ["Seventeen", "세븐틴", "새븐틴"],
     ["txt", "투머로우바이투게더", "투바투"],
+    ["twice", "트와이스"],
   ].map((d, i) => d.map(strProcess));
 
   const isDuplicateSingerRequested = duplicatedSingerNames.some(
