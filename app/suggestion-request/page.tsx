@@ -29,6 +29,8 @@ import { useForm } from "react-hook-form";
 
 import axios from "axios";
 
+import Swal from "sweetalert2";
+
 interface SuggestionRequest {
   name: string;
   studentNumber: string;
@@ -39,12 +41,15 @@ interface SuggestionRequest {
 const formSchema = z.object({
   name: z.string().min(1, { message: "이름을 입력해주세요." }),
   studentNumber: z.string().length(5, { message: "학번이 아닙니다." }),
+  email: z.string().min(1, { message: "이메일 주소를 입력해주세요." }),
   suggestion: z.string().min(1, { message: "건의사항을 입력해주세요." }),
   readPrecaution: z.boolean(),
 });
 
 export default function SuggestionRequestPage() {
   const [suggestionList, setSuggestionList] = useState<SuggestionRequest[]>();
+  const [verificationSuccess, setVerificationSuccess] =
+    useState<boolean>(false);
 
   async function refreshSuggestionList() {
     axios.get("/api/suggestion-request").then((response) => {
@@ -60,12 +65,28 @@ export default function SuggestionRequestPage() {
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({
-      name: values.name,
-      studentNumber: values.studentNumber,
-      suggesion: values.suggestion,
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const response = await axios.post("/api/email-verification", {
+      emailAddr: values.email + "@seoun.sen.ms.kr",
     });
+    const verificationCode = response.data.code;
+
+    const { value: verificationCodeInput } = await Swal.fire({
+      title: "인증코드 입력",
+      text: `입력하신 학교 이메일(${values.email}@seoun.sen.ms.kr)로 인증코드가 발송되었습니다.`,
+      input: "number",
+      showCancelButton: true,
+      confirmButtonText: "인증",
+    });
+    if (verificationCodeInput !== verificationCode) {
+      toast.error("이메일 인증에 실패하였습니다.");
+      return;
+    }
+    if (!values.email.includes(values.studentNumber)) {
+      toast.error("인증하신 이메일과 입력하신 학번이 일치하지 않습니다.");
+      return;
+    }
+
     axios
       .post(`/api/suggestion-request?date=${Number(new Date())}`, {
         name: values.name,
@@ -85,6 +106,7 @@ export default function SuggestionRequestPage() {
       (values = {
         name: "",
         studentNumber: "",
+        email: "",
         suggestion: "",
         readPrecaution: false,
       })
@@ -107,7 +129,12 @@ export default function SuggestionRequestPage() {
                         <p className="font-bold">{suggestionData.suggestion}</p>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <p className="text-slate-400">&nbsp;&nbsp;&nbsp;{suggestionData.answer !== "" ? suggestionData.answer : "(아직 답변이 달리지 않았습니다.)"}</p>
+                        <p className="text-slate-400">
+                          &nbsp;&nbsp;&nbsp;
+                          {suggestionData.answer !== ""
+                            ? suggestionData.answer
+                            : "(아직 답변이 달리지 않았습니다.)"}
+                        </p>
                       </AccordionContent>
                     </AccordionItem>
                   </li>
@@ -161,6 +188,24 @@ export default function SuggestionRequestPage() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>신청자 학교 이메일</FormLabel>
+                  <div className="space-y-2 w-full">
+                    <div className="flex items-center justify-center space-x-2 border-input border rounded-md pr-3 w-full">
+                      <FormControl>
+                        <Input {...field} className="border-0" />
+                      </FormControl>
+                      <p>{"@seoun.sen.ms.kr"}</p>
+                    </div>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
