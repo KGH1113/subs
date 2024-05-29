@@ -44,11 +44,9 @@ const formSchema = z.object({
 
 export default function MorningSongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
-  const [songList, setSongList] = useState<SongRequest[]>();
+  const [songList, setSongList] = useState<SongRequest[]>([]);
   const [dateIndicator, setDateIndicator] = useState<string>("");
   const [detailedView, setDetailedView] = useState<boolean>(false);
-  const [verificationSuccess, setVerificationSuccess] =
-    useState<boolean>(false);
 
   async function refreshSongList() {
     axios
@@ -62,7 +60,7 @@ export default function MorningSongRequestPage() {
     refreshSongList();
     const refreshInterval = setInterval(() => {
       setLeftSecToRefresh((prev) => prev - 1);
-      if (leftSecToRefresh <= 0) {
+      if (leftSecToRefresh <= 0  && songList.length < 10) {
         refreshSongList();
         setLeftSecToRefresh(5);
       }

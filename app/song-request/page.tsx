@@ -44,7 +44,7 @@ const formSchema = z.object({
 
 export default function SongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
-  const [songList, setSongList] = useState<SongRequest[]>();
+  const [songList, setSongList] = useState<SongRequest[]>([]);
   const [detailedView, setDetailedView] = useState<boolean>(false);
 
   async function refreshSongList() {
@@ -59,7 +59,7 @@ export default function SongRequestPage() {
     refreshSongList();
     const refreshInterval = setInterval(() => {
       setLeftSecToRefresh((prev) => prev - 1);
-      if (leftSecToRefresh <= 0) {
+      if (leftSecToRefresh <= 0 && songList.length < 10) {
         refreshSongList();
         setLeftSecToRefresh(5);
       }
