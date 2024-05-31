@@ -59,8 +59,10 @@ export default function SongRequestPage() {
     refreshSongList();
     const refreshInterval = setInterval(() => {
       setLeftSecToRefresh((prev) => prev - 1);
-      if (leftSecToRefresh <= 0 && songList.length < 10) {
-        refreshSongList();
+      if (leftSecToRefresh <= 0) {
+        if (songList.length < 10) {
+          refreshSongList();
+        }
         setLeftSecToRefresh(5);
       }
     }, 1000);
