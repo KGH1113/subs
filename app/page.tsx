@@ -45,7 +45,7 @@ export default function Home(): React.ReactNode {
             <InfoText>
               &nbsp;&nbsp;&nbsp;웹사이트에서 점심시간에 재생될 음악 신청곡을
               받습니다. 그 후 방송부원들이 신청곡 중 음악을 선정하여 음악을
-              재생합니다. 신청곡이 신청했되었으나, 방송부원들의 의견에 따라
+              재생합니다. 신청곡이 신청되었으나, 방송부원들의 의견에 따라
               신청곡이 재생되지 않을 수 있습니다.
             </InfoText>
           </AccordionContent>
