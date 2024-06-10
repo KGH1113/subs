@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 import {
   Form,
@@ -10,9 +11,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 import { toast } from "sonner";
 
@@ -20,7 +32,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { TimerReset, Loader } from "lucide-react";
+import { TimerReset, Loader, Search } from "lucide-react";
 
 import axios from "axios";
 
@@ -31,6 +43,14 @@ interface SongRequest {
   studentNumber: string;
   songTitle: string;
   singer: string;
+  imgSrc: string;
+}
+
+interface SearchResult {
+  songTitle: string;
+  singer: string;
+  publishYear: number;
+  imgUrl: string;
 }
 
 const formSchema = z.object({
@@ -39,13 +59,17 @@ const formSchema = z.object({
   email: z.string().min(1, { message: "이메일 주소를 입력해주세요." }),
   songTitle: z.string().min(1, { message: "노래제목을 입력해주세요" }),
   singer: z.string().min(1, { message: "가수를 입력해주세요" }),
+  imgSrc: z.string(),
   readPrecaution: z.boolean(),
 });
 
 export default function SongRequestPage() {
   const [leftSecToRefresh, setLeftSecToRefresh] = useState<number>(5);
   const [songList, setSongList] = useState<SongRequest[]>([]);
-  const [detailedView, setDetailedView] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
+  const [viewSongSelectError, setViewSongSelectError] =
+    useState<boolean>(false);
 
   async function refreshSongList() {
     axios
@@ -102,6 +126,7 @@ export default function SongRequestPage() {
         studentNumber: values.studentNumber,
         songTitle: values.songTitle,
         singer: values.singer,
+        imgSrc: values.imgSrc,
       })
       .then((response) => {
         if (response.data.isValid) {
@@ -120,9 +145,11 @@ export default function SongRequestPage() {
         email: "",
         singer: "",
         songTitle: "",
+        imgSrc: "",
         readPrecaution: false,
       })
     );
+    setViewSongSelectError(true);
   }
 
   return (
@@ -171,49 +198,120 @@ export default function SongRequestPage() {
                     </FormControl>
                     <p>{"@seoun.sen.ms.kr"}</p>
                   </div>
-                  {/* <div className="flex">
-                    <Button
-                      type="button"
-                      variant={"outline"}
-                      className="p-0 px-3"
-                      onClick={async () => {
-                        
-                      }}
-                    >
-                      인증번호 발송
-                    </Button>
-                  </div> */}
                 </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="songTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>노래 제목</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="singer"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>가수</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormLabel className={viewSongSelectError ? "text-red-800" : ""}>
+            음악 선택
+            {!form.getValues("songTitle")
+              ? ""
+              : `: ${form.getValues("songTitle")} - ${form.getValues(
+                  "singer"
+                )}`}
+          </FormLabel>
+          <Drawer>
+            <DrawerTrigger className="w-fit inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+              노래 선택하기
+            </DrawerTrigger>
+            <DrawerContent className="h-[70%]">
+              <DrawerHeader>
+                <DrawerTitle>노래 검색</DrawerTitle>
+                <DrawerDescription>
+                  노래 검색을 통해 음악 신청이 가능합니다. <br /> 검색 Tip) 외국
+                  주요 서비스인 iTunes의 API를 사용하기 때문에, 영어로 검색하면
+                  검색 정확률이 올라갑니다.
+                </DrawerDescription>
+                <form className="border-2 rounded-full border-border my-2 flex space-x-2 items-center justify-between pr-4">
+                  <Input
+                    placeholder="노래 검색..."
+                    className="border-0 rounded-l-full p-5"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={searchQuery}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      axios
+                        .get(
+                          `https://itunes.apple.com/search?term=${searchQuery
+                            .split(" ")
+                            .join("+")}&entity=musicTrack`
+                        )
+                        .then((response) => {
+                          const searchResults: SearchResult[] = [];
+                          response.data.results.map((d: any) => {
+                            searchResults.push({
+                              songTitle: d.trackName,
+                              singer: d.artistName,
+                              publishYear: new Date(
+                                d.releaseDate
+                              ).getFullYear(),
+                              imgUrl: d.artworkUrl100,
+                            });
+                          });
+                          setSearchResult(searchResults);
+                        });
+                    }}
+                  >
+                    <Search size={18} color="#94A3B8" />
+                  </button>
+                </form>
+              </DrawerHeader>
+              <ul className="overflow-auto w-full ml-4">
+                {searchResult.length === 0 ? (
+                  <li className="m-2 font-bold">검색결과가 없습니다.</li>
+                ) : (
+                  searchResult.map((searchData, i) => (
+                    <li
+                      className={
+                        form.getValues("songTitle") === searchData.songTitle &&
+                        form.getValues("singer") === searchData.singer
+                          ? "m-2 border-[1px] border-primary rounded-md"
+                          : "m-2"
+                      }
+                      key={i}
+                      onClick={() => {
+                        form.setValue("songTitle", searchData.songTitle);
+                        form.setValue("singer", searchData.singer);
+                        form.setValue("imgSrc", searchData.imgUrl);
+                      }}
+                    >
+                      <div className="w-full flex space-x-2 justify-stretch">
+                        <div className="w-[3rem]">
+                          <AspectRatio ratio={1 / 1}>
+                            <Image
+                              src={searchData.imgUrl}
+                              alt="Image"
+                              className="rounded-md object-cover"
+                              width={300}
+                              height={300}
+                            />
+                          </AspectRatio>
+                        </div>
+                        <div className="w-full flex flex-col items-baseline">
+                          <p className="text-[0.9rem] font-bold break-words truncate">
+                            {searchData.songTitle}
+                          </p>
+                          <p className="text-[0.7rem] font-normal break-words truncate">
+                            {searchData.singer} | {searchData.publishYear}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+              <DrawerFooter>
+                <div className="flex">
+                  <DrawerClose asChild>
+                    <Button variant="outline">완료</Button>
+                  </DrawerClose>
+                </div>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
           <FormField
             control={form.control}
             name="readPrecaution"
@@ -230,7 +328,15 @@ export default function SongRequestPage() {
               </FormItem>
             )}
           />
-          <Button className="w-fit" type="submit">
+          <Button
+            className="w-fit"
+            type="submit"
+            onClick={() => {
+              if (!form.getValues("songTitle") || !form.getValues("singer")) {
+                setViewSongSelectError(true);
+              }
+            }}
+          >
             신청하기
           </Button>
         </form>
@@ -253,18 +359,20 @@ export default function SongRequestPage() {
         <div className="space-y-2 p-3">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold">신청목록 </h2>
-            <div className="flex items-center text-ring hover:bg-secondary p-1 rounded-md cursor-pointer">
-              <TimerReset
-                size={15}
-                onClick={async () => {
-                  await refreshSongList();
-                }}
-              />
-              <p>{leftSecToRefresh}</p>
+            <div className="hidden sm:flex sm:items-center sm:gap-2">
+              <div className="flex items-center text-ring hover:bg-secondary p-1 rounded-md cursor-pointer">
+                <TimerReset
+                  size={15}
+                  onClick={async () => {
+                    await refreshSongList();
+                  }}
+                />
+                <p>{leftSecToRefresh}</p>
+              </div>
+              <span className="text-sm text-ring font-normal mr-1">
+                {new Date().toLocaleDateString()}
+              </span>
             </div>
-            <span className="text-sm text-ring font-normal mr-1">
-              {new Date().toLocaleDateString()}
-            </span>
             {!songList ? (
               <Loader className="text-slate-400 animate-spin" size={17} />
             ) : (
@@ -290,30 +398,30 @@ export default function SongRequestPage() {
                       key={index}
                       className="flex space-x-1 sm:space-x-3 hover:underline cursor-pointer items-center"
                     >
-                      <p className="w-fit ">{`${
-                        songData.songTitle.length <= 10
-                          ? songData.songTitle
-                          : detailedView
-                          ? songData.songTitle
-                          : `${songData.songTitle.slice(0, 10)}...`
-                      }`}</p>
-                      <p className="w-fit ">-</p>
-                      <p className="w-fit ">{`${songData.singer}`}</p>
+                      <div className="w-full flex space-x-2 justify-stretch">
+                        <div className="w-[3rem]">
+                          <AspectRatio ratio={1 / 1}>
+                            <Image
+                              src={songData.imgSrc}
+                              alt="Image"
+                              className="rounded-md object-cover"
+                              width={300}
+                              height={300}
+                            />
+                          </AspectRatio>
+                        </div>
+                        <div className="w-[6rem]">
+                          <p className="text-[0.9rem] font-bold break-words truncate">
+                            {songData.songTitle}
+                          </p>
+                          <p className="text-[0.7rem] font-normal break-words truncate">
+                            {songData.singer}
+                          </p>
+                        </div>
+                      </div>
                     </li>
                   ))
                 )}
-                <div className="">
-                  {songList?.length === 0 ? (
-                    <></>
-                  ) : (
-                    <li
-                      className="flex px-2 py-1 rounded-md cursor-pointer w-fit hover:bg-secondary mt-4"
-                      onClick={() => setDetailedView((prev) => !prev)}
-                    >
-                      {detailedView ? "간략히 보기" : "자세히 보기"}
-                    </li>
-                  )}
-                </div>
               </ul>
             )}
           </div>

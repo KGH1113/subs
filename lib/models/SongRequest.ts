@@ -17,6 +17,10 @@ const songSchema = new Schema({
     type: String,
     required: true,
   },
+  imgSrc: {
+    type: String,
+    required: true,
+  },
   timestamp: {
     type: Date,
   },

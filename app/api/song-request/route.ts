@@ -9,6 +9,7 @@ interface SongRequest {
   studentNumber: string;
   songTitle: string;
   singer: string;
+  imgSrc: string;
 }
 
 interface BlacklistItem {
@@ -113,7 +114,7 @@ function isRequestValid({
 }
 
 async function addSongRequest(
-  { name, studentNumber, songTitle, singer }: SongRequest,
+  { name, studentNumber, songTitle, singer, imgSrc }: SongRequest,
   requestedTime: Date
 ): Promise<Validity> {
   await connectToDB();
@@ -135,7 +136,7 @@ async function addSongRequest(
   const requestValidity = isRequestValid({
     requests: requests.requests,
     blacklist: blacklist.requests,
-    newRequest: { name, studentNumber, songTitle, singer },
+    newRequest: { name, studentNumber, songTitle, singer, imgSrc },
     requestedTime,
   });
   if (requestValidity.isValid) {
@@ -148,6 +149,7 @@ async function addSongRequest(
             studentNumber: studentNumber,
             songTitle: songTitle,
             singer: singer,
+            imgSrc: imgSrc,
             timestamp: requestedTime,
           },
         },
