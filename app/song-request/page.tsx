@@ -287,6 +287,7 @@ export default function SongRequestPage() {
                               className="rounded-md object-cover"
                               width={300}
                               height={300}
+                              unoptimized
                             />
                           </AspectRatio>
                         </div>
@@ -407,6 +408,7 @@ export default function SongRequestPage() {
                               className="rounded-md object-cover"
                               width={300}
                               height={300}
+                              unoptimized
                             />
                           </AspectRatio>
                         </div>
