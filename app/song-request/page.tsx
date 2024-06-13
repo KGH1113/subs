@@ -343,7 +343,7 @@ export default function SongRequestPage() {
         </form>
       </Form>
 
-      <div className="sm:w-1/4 p-3 flex flex-col gap-[20px]">
+      <div className="sm:w-1/4 p-3 flex flex-col gap-[20px] overflow-auto">
         <div className="space-y-2 p-3 pb-6 border-border border-b-[1px]">
           <h2 className="text-lg font-semibold">신청시 주의사항</h2>
           <ul className="mx-[10px] space-y-2">
