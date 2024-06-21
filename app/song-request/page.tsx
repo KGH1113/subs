@@ -281,13 +281,12 @@ export default function SongRequestPage() {
                       <div className="w-full flex space-x-2 justify-stretch">
                         <div className="w-[3rem]">
                           <AspectRatio ratio={1 / 1}>
-                            <Image
+                            <img
                               src={searchData.imgUrl}
                               alt="Image"
                               className="rounded-md object-cover"
                               width={300}
                               height={300}
-                              unoptimized
                             />
                           </AspectRatio>
                         </div>
@@ -402,13 +401,12 @@ export default function SongRequestPage() {
                       <div className="w-full flex space-x-2 justify-stretch">
                         <div className="w-[3rem]">
                           <AspectRatio ratio={1 / 1}>
-                            <Image
+                            <img
                               src={songData.imgSrc}
                               alt="Image"
                               className="rounded-md object-cover"
                               width={300}
                               height={300}
-                              unoptimized
                             />
                           </AspectRatio>
                         </div>
