@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "is1-ssl.mzstatic.com",
+        hostname: "i.scdn.co",
         port: "",
         pathname: "/**",
       },

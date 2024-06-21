@@ -219,9 +219,7 @@ export default function SongRequestPage() {
               <DrawerHeader>
                 <DrawerTitle>노래 검색</DrawerTitle>
                 <DrawerDescription>
-                  노래 검색을 통해 음악 신청이 가능합니다. <br /> 검색 Tip) 외국
-                  주요 서비스인 iTunes의 API를 사용하기 때문에, 영어로 검색하면
-                  검색 정확률이 올라갑니다.
+                  노래 검색을 통해 음악 신청이 가능합니다.
                 </DrawerDescription>
                 <form className="border-2 rounded-full border-border my-2 flex space-x-2 items-center justify-between pr-4">
                   <Input
@@ -233,25 +231,65 @@ export default function SongRequestPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      const encoded = Buffer.from(
+                        `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOITIFY_SECRET}`
+                      ).toString("base64");
+                      console.log(encoded);
+                      const headers = {
+                        Authorization: `Basic ${encoded}`,
+                        "Content-Type": "application/x-www-form-urlencoded",
+                      };
+
+                      const payload = new URLSearchParams();
+                      payload.append("grant_type", "client_credentials");
+
                       axios
-                        .get(
-                          `https://itunes.apple.com/search?term=${searchQuery
-                            .split(" ")
-                            .join("+")}&entity=musicTrack`
+                        .post(
+                          "https://accounts.spotify.com/api/token",
+                          payload,
+                          { headers: headers }
                         )
-                        .then((response) => {
-                          const searchResults: SearchResult[] = [];
-                          response.data.results.map((d: any) => {
-                            searchResults.push({
-                              songTitle: d.trackName,
-                              singer: d.artistName,
-                              publishYear: new Date(
-                                d.releaseDate
-                              ).getFullYear(),
-                              imgUrl: d.artworkUrl100,
+                        .then((accesstoken_response) => {
+                          const access_token =
+                            accesstoken_response.data.access_token;
+
+                          const headers = {
+                            Authorization: `Bearer ${access_token}`,
+                          };
+
+                          const query_params = {
+                            q: searchQuery,
+                            type: "track",
+                            limit: 20,
+                          };
+
+                          axios
+                            .get("https://api.spotify.com/v1/search", {
+                              headers: headers,
+                              params: query_params,
+                            })
+                            .then((response) => {
+                              const searchResults: SearchResult[] = [];
+                              response.data.tracks.items.map((d: any) => {
+                                searchResults.push({
+                                  songTitle: d.name,
+                                  singer: d.artists.map(
+                                    (artistData: any) => artistData.name
+                                  )[0],
+                                  publishYear: new Date(
+                                    d.album.release_date
+                                  ).getFullYear(),
+                                  imgUrl: d.album.images[0].url,
+                                });
+                              });
+                              setSearchResult(searchResults);
+                            })
+                            .catch((error) => {
+                              console.error("Error:", error);
                             });
-                          });
-                          setSearchResult(searchResults);
+                        })
+                        .catch((error) => {
+                          console.error("Error:", error);
                         });
                     }}
                   >
@@ -259,17 +297,20 @@ export default function SongRequestPage() {
                   </button>
                 </form>
               </DrawerHeader>
-              <ul className="overflow-auto w-full ml-4">
+              <ul className="overflow-auto w-screen p-2 pl-4">
                 {searchResult.length === 0 ? (
-                  <li className="m-2 font-bold">검색결과가 없습니다.</li>
+                  <li className="m-2 font-bold ml-4 p-2">
+                    검색결과가 없습니다.
+                  </li>
                 ) : (
                   searchResult.map((searchData, i) => (
                     <li
                       className={
                         form.getValues("songTitle") === searchData.songTitle &&
-                        form.getValues("singer") === searchData.singer
-                          ? "m-2 border-[1px] border-primary rounded-md"
-                          : "m-2"
+                        form.getValues("singer") === searchData.singer &&
+                        form.getValues("imgSrc") === searchData.imgUrl
+                          ? "border-2 border-secondary rounded-md w-full p-2 box-border"
+                          : "border-2 border-background rounded-md w-full p-2 box-border"
                       }
                       key={i}
                       onClick={() => {
@@ -278,7 +319,7 @@ export default function SongRequestPage() {
                         form.setValue("imgSrc", searchData.imgUrl);
                       }}
                     >
-                      <div className="w-full flex space-x-2 justify-stretch">
+                      <div className="w-fit flex space-x-2 justify-stretch">
                         <div className="w-[3rem]">
                           <AspectRatio ratio={1 / 1}>
                             <img
@@ -290,7 +331,7 @@ export default function SongRequestPage() {
                             />
                           </AspectRatio>
                         </div>
-                        <div className="w-full flex flex-col items-baseline">
+                        <div className="w-fit flex flex-col items-baseline">
                           <p className="text-[0.9rem] font-bold break-words truncate">
                             {searchData.songTitle}
                           </p>
