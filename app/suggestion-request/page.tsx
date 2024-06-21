@@ -115,7 +115,7 @@ export default function SuggestionRequestPage() {
 
   return (
     <div className="block sm:flex h-full w-full">
-      <div className="flex flex-col gap-[20px] sm:w-3/4 sm:m-3 sm:mt-6 sm:mr-6 mb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-[calc(100dvh-101px)] overflow-auto">
+      <div className="flex flex-col gap-[20px] sm:w-3/4 sm:m-3 sm:mt-6 sm:mr-6 mb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-[calc(100dvh-200px)] overflow-auto">
         <div className="space-y-2 p-3">
           <ul className="mx-[10px]">
             {suggestionList?.length === 0 ? (
