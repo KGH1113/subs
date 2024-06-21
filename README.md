@@ -1,28 +1,47 @@
-# Seoun Broadcast System (SUBS)
+Seoun Broadcast System (SUBS)
+=============
 
 Welcome to the README for the School Broadcast Website (SUBS), the online platform for Seoun Broadcasting System at 서운중학교.
+-------------
 
-## Introduction
+# routes
+#### ```/```
+he mainpage of the website. It includes FAQ.
+### ```/song-request```
+Song Request Page of the website. You can request a song by filling the form made out of zod:
 
-The SUBS (Seoun Broadcasting System) is a student organization at 서운중학교 that handles various broadcasts within the school premises, including lunchtime music broadcasts, in-house announcements, and the Seoun Festival. As of 2023, the SUBS team consists of 14 members, including the head of broadcasting.
+- Inputing name and student number.
+- Verifing email. It only works on seoun middle school gmail account.
+    - You'll see the verify button. If you click that, website(client) sends a get request to /email-verification. Server will generate random 6-digit number. Then it will send it to an email to user using Gmail SMTP and also a client. Client will request user to input 6-digit, and compare with the number that recived from server.
+- Search the song and select.
+    - If you hit the search button, website(client) will reqeust an access token with client id and secret key to Spotify API. If client gets an access token, it will request the search data with the access token.
+- Check if you read the precaution and submit.
 
-## Features
+Then, client will send request to /api/song-request to add song request to DB.
 
-- Lunchtime Music Broadcast: Users can request songs to be played during lunchtime.
-- FAQ Section: Provides answers to common questions about the broadcasting system.
-- Meet the Developer: Learn about the developer behind the broadcasting website.
+#### ```/suggestion-request```
+Suggestion Request Page. You can request a song by filling the form made out of zod:
 
-## FAQ
+- Inputing name and student number.
+- Verifing email.
+    - Same algorithm with /song-request
+- Inputing suggestion.
 
-### Q: How are songs selected for the lunchtime music broadcast?
-A: Users can submit song requests on the website. The SUBS team members then curate and play the selected songs. Please note that not all requested songs may be played.
+Then, client will send request to /api/suggestion-request to add song request to DB.
+#### ```/new-crew```
+A page for hiring new crewmates. Uses uploadthing to manage application files.
 
-### Q: How are members of the broadcasting team selected?
-A: Broadcasting team members are recruited at the beginning of the semester (March-April). Look for recruitment notices on the [Seoun Middle School Website](https://seoun.sen.ms.kr/) and within the school premises.
+- Inputing name and student number.
+- Upload application.
+   - It uses uploadthing's ```<UploadButton />``` component.
 
-### Q: Who developed the broadcasting website?
-A: The broadcasting website was developed by Kang Guhyeon:
-   - Name: 강구현
-   - Student ID: 21201
-   - Email: gangguhyeon1113@gmail.com
-   - Instagram: @kgh_guhyeon
+Then, client will send request to /api/submit-application to add application data to DB.
+
+#### ```/api```
+Uses MongoDB Atlas
+- ```/song-request```
+- ```/suggestion-request```
+- ```/submit-application```
+- ```/uploadthing```
+   - Endpoint for uploadthing
+- ```/email-verification```
