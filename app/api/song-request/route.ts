@@ -119,6 +119,14 @@ async function addSongRequest(
 ): Promise<Validity> {
   await connectToDB();
 
+  if (!imgSrc) {
+    return {
+      isValid: false,
+      message:
+        "예전 버전의 웹사이트를 사용중이신 것 같습니다. 페이지를 새로고침해주세요.",
+    };
+  }
+
   const isValidDoc = JSON.parse(
     JSON.stringify(await SongRequestModel.findById("659454a2f2790d57d00ff1fd"))
   );
