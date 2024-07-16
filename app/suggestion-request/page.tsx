@@ -126,7 +126,7 @@ export default function SuggestionRequestPage() {
                   <li key={index}>
                     <AccordionItem value={`item-${index}`} key={index}>
                       <AccordionTrigger>
-                        <p className="font-bold">{suggestionData.suggestion}</p>
+                        <p className="font-bold text-left">{suggestionData.suggestion}</p>
                       </AccordionTrigger>
                       <AccordionContent>
                         <p className="text-slate-400">
