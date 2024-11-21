@@ -1,6 +1,20 @@
 import mongoose, { Schema } from "mongoose";
 
-const songSchema = new Schema({
+interface SongDB {
+  name: string;
+  studentNumber: string;
+  songTitle: string;
+  singer: string;
+  imgSrc: string;
+  timestamp: Date;
+}
+
+interface SongRequestDB {
+  date: string;
+  requests: SongDB[];
+}
+
+const songSchema = new Schema<SongDB>({
   songTitle: {
     type: String,
     required: true,
@@ -27,7 +41,7 @@ const songSchema = new Schema({
 });
 
 // Define the schema for the song request grouped by date
-const songRequestSchema = new Schema({
+const songRequestSchema = new Schema<SongRequestDB>({
   date: {
     type: String,
     required: true,
@@ -35,8 +49,10 @@ const songRequestSchema = new Schema({
   requests: [songSchema], // Array of song requests
 });
 
-const SongRequestModel =
-  mongoose.models.SongRequestModel ||
-  mongoose.model("song-request", songRequestSchema, "song-requests");
-
-export default SongRequestModel;
+export const SongRequestModel: mongoose.Model<SongRequestDB> =
+  mongoose.models["song-request"] ||
+  mongoose.model<SongRequestDB>(
+    "song-request",
+    songRequestSchema,
+    "song-requests"
+  );

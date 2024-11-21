@@ -30,6 +30,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 
 import Swal from "sweetalert2";
+import { Loader } from "lucide-react";
 
 interface SuggestionRequest {
   name: string;
@@ -43,13 +44,10 @@ const formSchema = z.object({
   studentNumber: z.string().length(5, { message: "학번이 아닙니다." }),
   email: z.string().min(1, { message: "이메일 주소를 입력해주세요." }),
   suggestion: z.string().min(1, { message: "건의사항을 입력해주세요." }),
-  readPrecaution: z.boolean(),
 });
 
 export default function SuggestionRequestPage() {
   const [suggestionList, setSuggestionList] = useState<SuggestionRequest[]>();
-  const [verificationSuccess, setVerificationSuccess] =
-    useState<boolean>(false);
 
   async function refreshSuggestionList() {
     axios.get("/api/suggestion-request").then((response) => {
@@ -108,16 +106,23 @@ export default function SuggestionRequestPage() {
         studentNumber: "",
         email: "",
         suggestion: "",
-        readPrecaution: false,
       })
     );
   }
 
   return (
-    <div className="block sm:flex h-full w-full">
-      <div className="flex flex-col gap-[20px] sm:w-3/4 sm:m-3 sm:mt-6 sm:mr-6 mb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-[calc(100dvh-200px)] overflow-auto">
+    <div
+      className="flex flex-col xl:flex-row w-full h-full"
+      style={{ height: "100%" }}
+    >
+      <div className="flex flex-col gap-[20px] xl:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] xl:border-r-[1px] xl:border-b-[0px] h-fit xl:h-full">
         <div className="space-y-2 p-3">
-          <ul className="mx-[10px]">
+          <ul className="mx-[10px] xl:h-full h-[calc(40dvh-101px)] overflow-auto">
+            {!suggestionList ? (
+              <Loader className="text-slate-400 animate-spin" size={30} />
+            ) : (
+              <></>
+            )}
             {suggestionList?.length === 0 ? (
               <li>아직 신청된 건의사항이 없습니다.</li>
             ) : (
@@ -126,7 +131,9 @@ export default function SuggestionRequestPage() {
                   <li key={index}>
                     <AccordionItem value={`item-${index}`} key={index}>
                       <AccordionTrigger>
-                        <p className="font-bold text-left">{suggestionData.suggestion}</p>
+                        <p className="font-bold text-left">
+                          {suggestionData.suggestion}
+                        </p>
                       </AccordionTrigger>
                       <AccordionContent>
                         <p className="text-slate-400">
@@ -148,24 +155,12 @@ export default function SuggestionRequestPage() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="sm:w-1/4 p-3 flex flex-col gap-[20px] mx-[10px]"
+          className="xl:w-1/4 xl:h-full h-[calc(60dvh-101px)] p-3 flex flex-col gap-[20px] mx-[10px] overflow-auto"
         >
-          <div className="space-y-2 p-3 pb-6 border-border border-b-[1px]">
-            <h2 className="text-lg font-semibold">신청시 주의사항</h2>
-            <ul className="mx-[10px] space-y-2">
-              <li>- 특정 방송부원을 저격하지 말아주세요</li>
-              <li>- 방송부원을 비하하는 내용을 신청하지 말아주세요.</li>
-              <li>
-                - 신청된 건의사항의 답변은 방송부원들이 직접 달아드리니,
-                오래걸릴 수 있습니다.
-              </li>
-            </ul>
-          </div>
-
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">신청하기</h2>
+            <h2 className="text-lg font-semibold mt-3">신청하기</h2>
           </div>
-          <div className="ml-[10px] space-y-[20px]">
+          <div className="ml-[10px] space-y-[20px] border-border border-b-[1px] pb-6">
             <FormField
               control={form.control}
               name="name"
@@ -223,25 +218,21 @@ export default function SuggestionRequestPage() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="readPrecaution"
-              render={({ field }) => (
-                <FormItem className="flex flex-row space-x-3 space-y-0 items-center mb-[25px]">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel>신청시 주의사항을 읽었습니다.</FormLabel>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <Button className="w-fit" type="submit">
               신청하기
             </Button>
+          </div>
+
+          <div className="space-y-2 p-3">
+            <h2 className="text-lg font-semibold">신청시 주의사항</h2>
+            <ul className="mx-[10px] space-y-2">
+              <li>- 특정 방송부원을 저격하지 말아주세요</li>
+              <li>- 방송부원을 비하하는 내용을 신청하지 말아주세요.</li>
+              <li>
+                - 신청된 건의사항의 답변은 방송부원들이 직접 달아드리니,
+                오래걸릴 수 있습니다.
+              </li>
+            </ul>
           </div>
         </form>
       </Form>

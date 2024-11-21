@@ -73,11 +73,14 @@ export default function NewCrewPage() {
   }
 
   return (
-    <div className="block sm:flex w-ful h-full" style={{ height: "100%" }}>
+    <div
+      className="flex flex-col xl:flex-row w-ful h-full"
+      style={{ height: "100%" }}
+    >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-[20px] sm:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-fit sm:h-full"
+          className="flex flex-col gap-[20px] xl:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] xl:border-r-[1px] xl:border-b-[0px] h-fit xl:h-full"
         >
           <FormField
             control={form.control}
@@ -149,7 +152,7 @@ export default function NewCrewPage() {
         </form>
       </Form>
 
-      <div className="sm:w-1/4 p-3 flex flex-col gap-[20px]">
+      <div className="xl:w-1/4 p-3 flex flex-col gap-[20px]">
         <div className="space-y-2 p-3 pb-6 border-border border-b-[1px]">
           <h2 className="text-lg font-semibold">지원 시 주의사항</h2>
           <ul className="mx-[10px] space-y-2">

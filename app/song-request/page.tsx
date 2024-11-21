@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 
 import {
   Form,
@@ -21,6 +20,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +39,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { TimerReset, Loader, Search } from "lucide-react";
+import { TimerReset, Loader, Search, Delete, Copy } from "lucide-react";
 
 import axios from "axios";
 
@@ -41,6 +48,12 @@ import Swal from "sweetalert2";
 interface SongRequest {
   name: string;
   studentNumber: string;
+  songTitle: string;
+  singer: string;
+  imgSrc: string;
+}
+
+interface SongSelectData {
   songTitle: string;
   singer: string;
   imgSrc: string;
@@ -70,6 +83,8 @@ export default function SongRequestPage() {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
   const [viewSongSelectError, setViewSongSelectError] =
     useState<boolean>(false);
+  const [selectedSongData, setSelectedSongData] = useState<SongSelectData>();
+  const [windowWidth, setWindowWidth] = useState<number>(0);
 
   async function refreshSongList() {
     axios
@@ -78,6 +93,10 @@ export default function SongRequestPage() {
         setSongList(response.data);
       });
   }
+
+  useEffect(() => {
+    setWindowWidth(window.innerWidth);
+  }, []);
 
   useEffect(() => {
     refreshSongList();
@@ -132,7 +151,6 @@ export default function SongRequestPage() {
         if (response.data.isValid) {
           toast.success("노래가 신청되었습니다.");
         } else {
-          console.log(response.data);
           toast.error(response.data.message);
         }
         refreshSongList();
@@ -153,11 +171,14 @@ export default function SongRequestPage() {
   }
 
   return (
-    <div className="block sm:flex w-full h-full" style={{ height: "100%" }}>
+    <div
+      className="flex flex-col xl:flex-row w-full h-full"
+      style={{ height: "100%" }}
+    >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-[20px] sm:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] sm:border-r-[1px] sm:border-b-[0px] h-fit sm:h-full"
+          className="flex flex-col gap-[20px] xl:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] xl:border-r-[1px] xl:border-b-[0px] h-fit xl:h-full"
         >
           <FormField
             control={form.control}
@@ -221,7 +242,10 @@ export default function SongRequestPage() {
                 <DrawerDescription>
                   노래 검색을 통해 음악 신청이 가능합니다.
                 </DrawerDescription>
-                <form className="border-2 rounded-full border-border my-2 flex space-x-2 items-center justify-between pr-4">
+                <form
+                  className="border-2 rounded-full border-border my-2 flex space-x-2 items-center justify-between pr-4"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <Input
                     placeholder="노래 검색..."
                     className="border-0 rounded-l-full p-5"
@@ -232,9 +256,8 @@ export default function SongRequestPage() {
                     type="button"
                     onClick={() => {
                       const encoded = Buffer.from(
-                        `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOITIFY_SECRET}`
+                        `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_SECRET}`
                       ).toString("base64");
-                      console.log(encoded);
                       const headers = {
                         Authorization: `Basic ${encoded}`,
                         "Content-Type": "application/x-www-form-urlencoded",
@@ -306,14 +329,19 @@ export default function SongRequestPage() {
                   searchResult.map((searchData, i) => (
                     <li
                       className={
-                        form.getValues("songTitle") === searchData.songTitle &&
-                        form.getValues("singer") === searchData.singer &&
-                        form.getValues("imgSrc") === searchData.imgUrl
+                        selectedSongData?.songTitle === searchData.songTitle &&
+                        selectedSongData?.singer === searchData.singer &&
+                        selectedSongData?.imgSrc === searchData.imgUrl
                           ? "border-2 border-secondary rounded-md w-full p-2 box-border"
                           : "border-2 border-background rounded-md w-full p-2 box-border"
                       }
                       key={i}
                       onClick={() => {
+                        setSelectedSongData({
+                          songTitle: searchData.songTitle,
+                          singer: searchData.singer,
+                          imgSrc: searchData.imgUrl,
+                        });
                         form.setValue("songTitle", searchData.songTitle);
                         form.setValue("singer", searchData.singer);
                         form.setValue("imgSrc", searchData.imgUrl);
@@ -373,7 +401,7 @@ export default function SongRequestPage() {
             className="w-fit"
             type="submit"
             onClick={() => {
-              if (!form.getValues("songTitle") || !form.getValues("singer")) {
+              if (!selectedSongData) {
                 setViewSongSelectError(true);
               }
             }}
@@ -383,7 +411,7 @@ export default function SongRequestPage() {
         </form>
       </Form>
 
-      <div className="sm:w-1/4 p-3 flex flex-col gap-[20px] overflow-auto">
+      <div className="xl:w-1/4 p-3 flex flex-col gap-[20px] overflow-auto">
         <div className="space-y-2 p-3 pb-6 border-border border-b-[1px]">
           <h2 className="text-lg font-semibold">신청시 주의사항</h2>
           <ul className="mx-[10px] space-y-2">
@@ -398,9 +426,21 @@ export default function SongRequestPage() {
           </ul>
         </div>
         <div className="space-y-2 p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex">
             <h2 className="text-lg font-semibold">신청목록 </h2>
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
+            {!songList ? (
+              <Loader className="text-slate-400 animate-spin" size={17} />
+            ) : (
+              <></>
+            )}
+            <div
+              className={`flex justify-between mx-3 xl:items-center xl:gap-2 ${
+                windowWidth < 1500 ? "hidden" : "flex"
+              }`}
+            >
+              <span className="text-sm text-ring font-normal mr-1">
+                {new Date().toLocaleDateString()}
+              </span>
               <div className="flex items-center text-ring hover:bg-secondary p-1 rounded-md cursor-pointer">
                 <TimerReset
                   size={15}
@@ -410,34 +450,20 @@ export default function SongRequestPage() {
                 />
                 <p>{leftSecToRefresh}</p>
               </div>
-              <span className="text-sm text-ring font-normal mr-1">
-                {new Date().toLocaleDateString()}
-              </span>
             </div>
-            {!songList ? (
-              <Loader className="text-slate-400 animate-spin" size={17} />
-            ) : (
-              <></>
-            )}
           </div>
           <div>
             {!songList ? (
               <ul className="mx-[10px] space-y-1 animate-pulse">. . .</ul>
             ) : (
-              <ul className="mx-[10px] space-y-1">
+              <ul className="">
                 {songList?.length === 0 ? (
-                  <li>아직 신청된 곡이 없습니다.</li>
+                  <li className="p-2">아직 신청된 곡이 없습니다.</li>
                 ) : (
                   songList?.map((songData, index) => (
                     <li
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `${songData.songTitle} - ${songData.singer}`
-                        );
-                        toast.success("복사되었습니다.");
-                      }}
                       key={index}
-                      className="flex space-x-1 sm:space-x-3 hover:underline cursor-pointer items-center"
+                      className="flex space-x-1 sm:space-x-3 items-center border-2 border-background hover:border-border p-2 rounded-md ease-in-out duration-300"
                     >
                       <div className="w-full flex space-x-2 justify-stretch">
                         <div className="w-[3rem]">
@@ -460,6 +486,115 @@ export default function SongRequestPage() {
                           </p>
                         </div>
                       </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <div className="hover:bg-secondary rounded-full p-1 cursor-pointer">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              className="lucide lucide-ellipsis-vertical"
+                            >
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="12" cy="5" r="1" />
+                              <circle cx="12" cy="19" r="1" />
+                            </svg>
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                `${songData.songTitle} - ${songData.singer}`
+                              );
+                              toast.success("복사되었습니다.");
+                            }}
+                          >
+                            <Copy className="mr-2 h-4 w-4" />
+                            <span>복사</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={async () => {
+                              const { value: emailAddrInput, isConfirmed } =
+                                await Swal.fire({
+                                  title: "신청자 이메일 인증",
+                                  text: "신청취소를 할 노래를 신청하신 분의 학교 이메일을 입력주세요.",
+                                  html: `
+                                  <div style="display: flex; gap: 0.5rem; padding: 0.5rem; justify-content: center; align-items: center; border: 2px solid; border-radius: 0.7rem">
+                                    <input id="swal-input1" style="margin: 0; border: none; padding: 0.5rem 1rem; width: 50%;">
+                                    <span style="font-size: 1rem;">@seoun.sen.ms.kr</span>
+                                  </div>
+                                `,
+                                  focusConfirm: false,
+                                  showCancelButton: true,
+                                  confirmButtonText: "인증",
+                                  preConfirm: () => {
+                                    return (
+                                      document.getElementById(
+                                        "swal-input1"
+                                      )! as any
+                                    ).value;
+                                  },
+                                });
+                              if (
+                                !emailAddrInput.includes(songData.studentNumber)
+                              ) {
+                                toast.error(
+                                  "인증하신 이메일과 입력하신 신청자의 학번이 일치하지 않습니다."
+                                );
+                                return;
+                              }
+
+                              const response = await axios.post(
+                                "/api/email-verification",
+                                {
+                                  emailAddr:
+                                    emailAddrInput + "@seoun.sen.ms.kr",
+                                }
+                              );
+                              const verificationCode = response.data.code;
+
+                              const { value: verificationCodeInput } =
+                                await Swal.fire({
+                                  title: "인증코드 입력",
+                                  text: `입력하신 학교 이메일(${emailAddrInput}@seoun.sen.ms.kr)로 인증코드가 발송되었습니다.`,
+                                  input: "number",
+                                  showCancelButton: true,
+                                  confirmButtonText: "인증",
+                                });
+
+                              if (verificationCodeInput !== verificationCode) {
+                                toast.error("이메일 인증에 실패하였습니다.");
+                                return;
+                              }
+
+                              axios
+                                .delete("/api/song-request", {
+                                  data: {
+                                    name: songData.name,
+                                    studentNumber: songData.studentNumber,
+                                  },
+                                })
+                                .then((response) => {
+                                  if (response.data.isValid) {
+                                    toast.success("신청이 취소되었습니다.");
+                                  } else {
+                                    toast.error(response.data.message);
+                                  }
+                                });
+                            }}
+                          >
+                            <Delete className="mr-2 h-4 w-4" />
+                            <span>신청취소</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </li>
                   ))
                 )}

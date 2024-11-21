@@ -29,7 +29,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "h-fit bg-background font-sans antialiased dark",
+          "h-fit bg-background font-sans antialiased dark xl:overflow-hidden",
           fontSans.variable
         )}
       >

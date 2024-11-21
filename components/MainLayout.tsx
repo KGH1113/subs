@@ -19,8 +19,9 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [showSidebar, setShowSidebar] = useState<boolean>();
+  const [showSidebar, setShowSidebar] = useState<boolean>(true);
   const [isMobile, setIsMobile] = useState<boolean>();
+  const [isTablet, setIsTablet] = useState<boolean>();
 
   const {
     isHomeActive,
@@ -49,6 +50,7 @@ export default function MainLayout({
   useEffect(() => {
     setShowSidebar(window?.innerWidth > 640);
     setIsMobile(window?.innerWidth <= 640);
+    setIsTablet(!isMobile && window.innerWidth <= 1400);
   }, []);
 
   const SidebarLink = ({
@@ -81,7 +83,7 @@ export default function MainLayout({
     ) : (
       <ResizablePanel
         minSize={10}
-        defaultSize={15}
+        defaultSize={isTablet ? 25 : 15}
         order={1}
         className={`${showSidebar ? "" : "hidden"}`}
       >
@@ -92,10 +94,7 @@ export default function MainLayout({
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <SidebarLayout>
-        <aside
-          id="sidebar"
-          className="h-screen"
-        >
+        <aside id="sidebar" className="h-screen">
           <div className="fixed sm:relative z-20 max-[640px]:flex max-[640px]:gap-3 max-[640px]:w-3/4 z-100">
             <div className=" block h-[200px] justify-center items-center p-6 bg-background overflow-hidden max-[640px]:border-solid max-[640px]:border h-screen max-[640px]:w-3/4">
               <div className="flex gap-3 w-full h-8 mt-3 mb-8 items-center font-semibold">
@@ -118,13 +117,6 @@ export default function MainLayout({
                   <Lucide.Music4 className="w-5" />
                   <span>{"점심시간 음악신청"}</span>
                 </SidebarLink>
-                {/* <SidebarLink
-                  hrefName={"/morning-song-request"}
-                  active={isMorningSongRequestActive}
-                >
-                  <Lucide.Music2 className="w-5" />
-                  <span>{"등굣길 음악신청"}</span>
-                </SidebarLink> */}
                 <SidebarLink
                   hrefName={"/suggestion-request"}
                   active={isSuggestionActive}
@@ -150,8 +142,10 @@ export default function MainLayout({
         </aside>
       </SidebarLayout>
       <ResizableHandle withHandle className="max-[640px]:hidden" />
-      <ResizablePanel minSize={70} defaultSize={85} order={2}>
-        <div className="fixed sm:relative z-10 flex w-full h-[101px] justify-between items-center px-5 border-border border-b-[1px] bg-background"> {}
+      <ResizablePanel minSize={70} defaultSize={isTablet ? 75 : 85} order={2}>
+        <div className="fixed sm:relative z-10 flex w-full h-[101px] justify-between items-center px-5 border-border border-b-[1px] bg-background">
+          {" "}
+          {}
           <div className="w-[24px] h-[24px] flex items-center justify-center">
             <Lucide.Menu
               className="min-[640px]:hidden"
@@ -162,7 +156,7 @@ export default function MainLayout({
           </div>
           <h1 className="font-semibold text-lg mr-3">{getTitle()}</h1>
         </div>
-        <main className="w-full h-full overflow-visible p-6 text-sm font-medium mt-[101px] sm:mt-[0px] sm:max-h-[calc(100vh-101px)]">
+        <main className="w-full h-full overflow-auto p-6 text-sm font-medium mt-[101px] sm:mt-[0px] sm:max-h-[calc(100vh-101px)]">
           {children}
         </main>
       </ResizablePanel>

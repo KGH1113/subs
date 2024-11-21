@@ -1,6 +1,18 @@
 import mongoose, { Schema } from "mongoose";
 
-const suggestionSchema = new Schema({
+interface SgstnDB {
+  name: string;
+  studentNumber: string;
+  suggestion: string;
+  answer: string;
+  timestamp: Date;
+}
+
+interface SgstnRequestDB {
+  requests: SgstnDB[];
+}
+
+const suggestionSchema = new Schema<SgstnDB>({
   answer: {
     type: String,
     required: true,
@@ -22,16 +34,14 @@ const suggestionSchema = new Schema({
   },
 });
 
-const suggestionRequestSchema = new Schema({
+const suggestionRequestSchema = new Schema<SgstnRequestDB>({
   requests: [suggestionSchema], // Array of suggestion requests
 });
 
-const SuggestionRequestModel =
-  mongoose.models.SuggestionRequestModel ||
-  mongoose.model(
+export const SuggestionRequestModel: mongoose.Model<SgstnRequestDB> =
+  mongoose.models["suggestion-request"] ||
+  mongoose.model<SgstnRequestDB>(
     "suggestion-request",
     suggestionRequestSchema,
     "suggestion-requests"
   );
-
-export default SuggestionRequestModel;
