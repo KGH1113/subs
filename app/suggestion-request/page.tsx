@@ -115,7 +115,7 @@ export default function SuggestionRequestPage() {
       className="flex flex-col xl:flex-row w-full h-full"
       style={{ height: "100%" }}
     >
-      <div className="flex flex-col gap-[20px] xl:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] xl:border-r-[1px] xl:border-b-[0px] h-fit xl:h-full">
+      <div className="flex flex-col gap-[20px] xl:w-3/4 p-3 pr-6 pb-6 border-border border-b-[1px] xl:border-r-[1px] xl:border-b-[0px] h-fit xl:h-full overflow-auto">
         <div className="space-y-2 p-3">
           <ul className="mx-[10px] xl:h-full h-[calc(40dvh-101px)] overflow-auto">
             {!suggestionList ? (
